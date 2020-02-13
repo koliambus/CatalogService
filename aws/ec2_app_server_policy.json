@@ -11,7 +11,18 @@
         "dynamodb:GetItem",
         "dynamodb:UpdateItem"
       ],
-      "Resource": "arn:aws:dynamodb:us-east-2:433329183834:table/songs"
+      "Resource": "arn:aws:dynamodb:<region>:<aws_account_id>:table/songs"
+    },
+    {
+      "Sid": "AccessCodeArtifacts",
+      "Effect": "Allow",
+      "Action": [
+        "s3:*"
+      ],
+      "Resource": [
+        "arn:aws:s3:::ua.koliambus.catalogservice.artifacts",
+        "arn:aws:s3:::ua.koliambus.catalogservice.artifacts/*"
+      ]
     }
   ]
 }
