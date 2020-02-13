@@ -1,0 +1,49 @@
+{
+  "Version" : "2012-10-17",
+  "Id" : "key-default-1",
+  "Statement" : [ {
+    "Sid" : "Enable IAM User Permissions",
+    "Effect" : "Allow",
+    "Principal" : {
+      "AWS" : "arn:aws:iam::433329183834:root"
+    },
+    "Action" : "kms:*",
+    "Resource" : "*"
+  },
+    {
+      "Sid": "Allow access through Amazon S3 for all principals in the account that are authorized to use Amazon S3",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "*"
+      },
+      "Action": [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:DescribeKey"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "kms:ViaService": "s3.us-east2.amazonaws.com",
+          "kms:CallerAccount": "433329183834"
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::433329183834:role/CodeBuildServiceRole"
+      },
+      "Action": [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:DescribeKey"
+      ],
+      "Resource": "*"
+    }]
+}
+

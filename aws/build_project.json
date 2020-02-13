@@ -1,0 +1,19 @@
+{
+    "name": "CatalogService_CodeBuild_project",
+    "description": "",
+    "source": {
+        "type": "S3",
+        "location": "ua.koliambus.catalogservice.source/CatalogService.zip"
+    },
+    "artifacts": {
+        "type": "S3",
+        "location": "ua.koliambus.catalogservice.artifacts"
+    },
+    "environment": {
+        "type": "LINUX_CONTAINER",
+        "image": "aws/codebuild/java:openjdk-8",
+        "computeType": "BUILD_GENERAL1_SMALL"
+    },
+    "serviceRole": "CodeBuildServiceRole",
+    "encryptionKey": "3d93e4da-35d6-484d-9f00-b5cfb4670515"
+}

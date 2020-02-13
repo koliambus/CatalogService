@@ -1,0 +1,101 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.packtpub.microservices.course</groupId>
+    <artifactId>CatalogService</artifactId>
+    <packaging>jar</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <name>CatalogService</name>
+
+    <properties>
+        <jdk.version>1.8</jdk.version>
+        <spring.version>2.2.4.RELEASE</spring.version>
+        <jstl.version>1.2</jstl.version>
+        <junit.version>4.11</junit.version>
+        <logback.version>1.0.13</logback.version>
+        <jcl-over-slf4j.version>1.7.5</jcl-over-slf4j.version>
+    </properties>
+
+    <dependencies>
+
+        <!-- Spring -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring.version}</version><exclusions>
+            <exclusion>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+            </exclusion>
+        </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>${spring.version}</version><exclusions>
+        </exclusions>
+        </dependency>
+
+
+        <!-- DynamoDB -->
+
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-dynamodb</artifactId>
+            <version>1.11.718</version>
+        </dependency>
+
+        <!-- Logging libraries -->
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>${jcl-over-slf4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+
+
+    </dependencies>
+
+    <build>
+        <finalName>CatalogService</finalName>
+
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!-- Additional Maven Repositories-->
+    <repositories>
+        <repository>
+            <id>dynamodb-sdk</id>
+            <name>DynamoDB SDK Repository</name>
+            <url>https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-dynamodb</url>
+        </repository>
+    </repositories>
+</project>
