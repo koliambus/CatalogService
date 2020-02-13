@@ -75,3 +75,4 @@ mvn tomcat7:run -Dspring.profiles.active=prod
 ```
 
 The application is available in the location http://<ec2_domain_name>:8080/
+
