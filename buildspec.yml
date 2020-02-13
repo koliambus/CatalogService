@@ -11,3 +11,6 @@ phases:
 artifacts:
   files:
     - target/CatalogService.jar
+    - scripts/*.sh
+    - appspec.yml
+  discard-paths: yes
