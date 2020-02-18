@@ -23,7 +23,11 @@ public class SongsRepository {
     public Optional<Song> getSong(final String songIdentifier) {
         DynamoDBSongItem songItem = dynamoDBMapper.load(DynamoDBSongItem.class, songIdentifier);
 
-        return Optional.ofNullable(songItem.toSong());
+        if (songItem == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(songItem.toSong());
     }
 
     public List<Song> getSongs(Integer offset, Integer limit) {
