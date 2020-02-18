@@ -61,6 +61,12 @@
             <version>${logback.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-sqs</artifactId>
+            <version>1.11.723</version>
+        </dependency>
+
 
     </dependencies>
 

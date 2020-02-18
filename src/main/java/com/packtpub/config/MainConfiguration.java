@@ -4,8 +4,11 @@ import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
+import com.packtpub.songs.event.PublicationNotifier;
 import com.packtpub.songs.repository.SongsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -22,6 +25,18 @@ public class MainConfiguration {
 
     @Autowired
     private ConfigurableEnvironment environment;
+
+
+    @Bean
+    public PublicationNotifier publicationNotifier(@Value("${com.packtpub.service.catalog.song.sqs-queue}") String queueName) {
+        final String region = environment.getProperty(REGION_PROPERTY_NAME);
+
+        return new PublicationNotifier(
+                AmazonSQSClientBuilder.standard().
+                        withRegion(region).build(),
+                queueName
+        );
+    }
 
     @Bean
     public DynamoDBMapper dynamoDBMapper() {

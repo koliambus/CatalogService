@@ -23,6 +23,14 @@
         "arn:aws:s3:::ua.koliambus.catalogservice.artifacts",
         "arn:aws:s3:::ua.koliambus.catalogservice.artifacts/*"
       ]
+    },
+    {
+      "Sid": "WriteToSongsQueue",
+      "Effect": "Allow",
+      "Action": [
+        "sqs:SendMessage"
+      ],
+      "Resource": "arn:aws:sqs:<region>:<aws_account_id>:published_songs_queue"
     }
   ]
 }

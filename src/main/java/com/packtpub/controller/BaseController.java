@@ -1,8 +1,8 @@
 package com.packtpub.controller;
 
 import com.packtpub.songs.model.Song;
+import com.packtpub.songs.publisher.SongsPublicationService;
 import com.packtpub.songs.repository.SongIdentifierExistsException;
-import com.packtpub.songs.repository.SongsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,26 +16,26 @@ import java.util.Optional;
 public class BaseController {
 
     @Autowired
-    private SongsRepository songsRepository;
-
-    @RequestMapping(value = "/songs",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Song>> getSongs(@RequestParam(value = "limit", defaultValue = "10") Integer limit,
-                                               @RequestParam(value = "offset", defaultValue = "0") Integer offset) {
-        List<Song> songs = songsRepository.getSongs(offset, limit);
-        if (songs.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.ok(songs);
-    }
+    private SongsPublicationService publicationService;
+//
+//    @RequestMapping(value = "/songs",
+//            method = RequestMethod.GET,
+//            produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<Song>> getSongs(@RequestParam(value = "limit", defaultValue = "10") Integer limit,
+//                                               @RequestParam(value = "offset", defaultValue = "0") Integer offset) {
+//        List<Song> songs = publicationService.getSongs(offset, limit);
+//        if (songs.isEmpty()) {
+//            return ResponseEntity.noContent().build();
+//        }
+//
+//        return ResponseEntity.ok(songs);
+//    }
 
     @RequestMapping(value = "songs/{song_id}",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Song> getSong(@PathVariable("song_id") String songIdentifier, ModelMap model) {
-        final Optional<Song> song = songsRepository.getSong(songIdentifier);
+        final Optional<Song> song = publicationService.getSong(songIdentifier);
         return song.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
 
     }
@@ -46,7 +46,7 @@ public class BaseController {
     @ResponseBody
     public ResponseEntity<?> publishSong(@RequestBody Song song) {
         try {
-            songsRepository.storeSong(song);
+            publicationService.publish(song);
 
             return ResponseEntity.ok().build();
         } catch(SongIdentifierExistsException e) {
