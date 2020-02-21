@@ -1,10 +1,13 @@
 package com.packtpub.config;
 
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
+import com.packtpub.monitoring.CloudwatchMetricsEmitter;
 import com.packtpub.songs.event.PublicationNotifier;
 import com.packtpub.songs.repository.SongsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +46,18 @@ public class MainConfiguration {
         AmazonDynamoDB dynamoDB = getDynamoDB();
 
         return new DynamoDBMapper(dynamoDB);
+    }
+
+    @Bean
+    public CloudwatchMetricsEmitter metricsEmitter() {
+        final String region = environment.getProperty(REGION_PROPERTY_NAME);
+        final String stage = environment.getProperty(STAGE_PROPERTY_NAME);
+
+        AmazonCloudWatch cloudwatchClient = AmazonCloudWatchClientBuilder.standard()
+                .withRegion(region)
+                .build();
+
+        return new CloudwatchMetricsEmitter(cloudwatchClient, stage);
     }
 
     @Bean

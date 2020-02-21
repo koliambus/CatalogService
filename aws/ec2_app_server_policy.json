@@ -31,6 +31,14 @@
         "sqs:SendMessage"
       ],
       "Resource": "arn:aws:sqs:<region>:<aws_account_id>:published_songs_queue"
+    },
+    {
+      "Sid": "AddMetricsToCloudwatch",
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:putMetricData"
+      ],
+      "Resource": "*"
     }
   ]
 }
