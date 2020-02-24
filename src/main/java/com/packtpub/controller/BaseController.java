@@ -45,7 +45,6 @@ public class BaseController {
     @RequestMapping(value = {"/songs"},
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
     public ResponseEntity<?> publishSong(@RequestBody Song song) {
         emitEndpointRequest(PUBLISH_SONG_ENDPOINT_NAME);
         final long startTimestamp = System.currentTimeMillis();
@@ -59,6 +58,12 @@ public class BaseController {
         } finally {
             emitLatencyMetric(PUBLISH_SONG_ENDPOINT_NAME, System.currentTimeMillis() - startTimestamp);
         }
+    }
+
+
+    @GetMapping(value = "health-check", produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> healthCheck() {
+        return ResponseEntity.ok("Instance is healthy!");
     }
 
     private void emitLatencyMetric(final String endpointName, final long value) {
