@@ -48,6 +48,12 @@
             <version>${aws.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>7.1.0</version>
+        </dependency>
+
         <!-- Logging libraries -->
 
         <dependency>

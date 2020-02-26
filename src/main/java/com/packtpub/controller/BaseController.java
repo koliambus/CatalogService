@@ -4,11 +4,13 @@ import com.packtpub.monitoring.CloudwatchMetricsEmitter;
 import com.packtpub.songs.model.Song;
 import com.packtpub.songs.publisher.SongsPublicationService;
 import com.packtpub.songs.repository.SongIdentifierExistsException;
+import com.packtpub.songs.search.SongsSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -27,11 +29,12 @@ public class BaseController {
     private SongsPublicationService publicationService;
 
     @Autowired
+    private SongsSearchService searchService;
+
+    @Autowired
     private CloudwatchMetricsEmitter metricsEmitter;
 
-    @RequestMapping(value = "songs/{song_id}",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "songs/{song_id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Song> getSong(@PathVariable("song_id") String songIdentifier) {
         emitEndpointRequest(GET_SONG_ENDPOINT_NAME);
         final long startTimestamp = System.currentTimeMillis();
@@ -39,12 +42,20 @@ public class BaseController {
         ResponseEntity<Song> songResponseEntity = song.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
         emitLatencyMetric(GET_SONG_ENDPOINT_NAME, System.currentTimeMillis() - startTimestamp);
         return songResponseEntity;
-
     }
 
-    @RequestMapping(value = {"/songs"},
-            method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "songs", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Song>> searchSongs(@RequestParam(name = "q", defaultValue = "") String q) {
+        List<Song> songs = searchService.searchSongs(q);
+
+        if (songs.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(songs);
+    }
+
+    @PostMapping(value = {"/songs"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> publishSong(@RequestBody Song song) {
         emitEndpointRequest(PUBLISH_SONG_ENDPOINT_NAME);
         final long startTimestamp = System.currentTimeMillis();

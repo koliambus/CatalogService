@@ -10,6 +10,9 @@ import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.packtpub.monitoring.CloudwatchMetricsEmitter;
 import com.packtpub.songs.event.PublicationNotifier;
 import com.packtpub.songs.repository.SongsRepository;
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -63,6 +66,19 @@ public class MainConfiguration {
     @Bean
     public SongsRepository songsRepository(final DynamoDBMapper dynamoDBMapper) {
         return new SongsRepository(dynamoDBMapper);
+    }
+
+    @Bean
+    public RestHighLevelClient elasticsearchClient(
+            @Value("${com.packtpub.catalog.elasticsearch.host}") String host,
+            @Value("${com.packtpub.catalog.elasticsearch.port}") Integer port,
+            @Value("${com.packtpub.catalog.elasticsearch.scheme}") String scheme
+    ) {
+        return new RestHighLevelClient(
+                RestClient.builder(
+                        new HttpHost(host, port, scheme)
+                )
+        );
     }
 
     private AmazonDynamoDB getDynamoDB() {
