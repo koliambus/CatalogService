@@ -15,6 +15,7 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -30,6 +31,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @Import(EnvironmentConfiguration.class)
 @EnableWebMvc
 @EnableSwagger2
+@EnableCaching
 public class MainConfiguration {
 
     private static final String STAGE_PROPERTY_NAME = "stage";

@@ -6,6 +6,8 @@ import com.packtpub.songs.publisher.SongsPublicationService;
 import com.packtpub.songs.repository.SongIdentifierExistsException;
 import com.packtpub.songs.search.SongsSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +37,7 @@ public class BaseController {
     private CloudwatchMetricsEmitter metricsEmitter;
 
     @GetMapping(value = "songs/{song_id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Cacheable(cacheNames = {"get_song"}, key = "#songIdentifier")
     public ResponseEntity<Song> getSong(@PathVariable("song_id") String songIdentifier) {
         emitEndpointRequest(GET_SONG_ENDPOINT_NAME);
         final long startTimestamp = System.currentTimeMillis();
@@ -45,6 +48,7 @@ public class BaseController {
     }
 
     @GetMapping(value = "songs", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Cacheable(cacheNames = {"songs_search_result"}, key = "#q")
     public ResponseEntity<List<Song>> searchSongs(@RequestParam(name = "q", defaultValue = "") String q) {
         List<Song> songs = searchService.searchSongs(q);
 
@@ -56,6 +60,7 @@ public class BaseController {
     }
 
     @PostMapping(value = {"/songs"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @CacheEvict(cacheNames = {"songs_search_result"}, allEntries = true)
     public ResponseEntity<?> publishSong(@RequestBody Song song) {
         emitEndpointRequest(PUBLISH_SONG_ENDPOINT_NAME);
         final long startTimestamp = System.currentTimeMillis();
