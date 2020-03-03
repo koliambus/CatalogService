@@ -6,6 +6,11 @@ import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.elasticache.AmazonElastiCache;
+import com.amazonaws.services.elasticache.AmazonElastiCacheClientBuilder;
+import com.amazonaws.services.elasticache.model.CacheCluster;
+import com.amazonaws.services.elasticache.model.CacheNode;
+import com.amazonaws.services.elasticache.model.DescribeCacheClustersRequest;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.packtpub.monitoring.CloudwatchMetricsEmitter;
 import com.packtpub.songs.event.PublicationNotifier;
@@ -13,13 +18,20 @@ import com.packtpub.songs.repository.SongsRepository;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.connection.RedisClusterConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -27,12 +39,19 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 @Configuration
 @Import(EnvironmentConfiguration.class)
 @EnableWebMvc
 @EnableSwagger2
 @EnableCaching
 public class MainConfiguration {
+
+    private Logger logger = LoggerFactory.getLogger(MainConfiguration.class);
 
     private static final String STAGE_PROPERTY_NAME = "stage";
     private static final String REGION_PROPERTY_NAME = "region";
@@ -114,5 +133,52 @@ public class MainConfiguration {
             default:
                 throw new RuntimeException("Stage defined in properties unknown: " + stage);
         }
+    }
+
+    @Bean
+    public LettuceConnectionFactory lettuceConnectionFactory(List<String> clusterNodes) {
+        RedisClusterConfiguration clusterConfiguration = new RedisClusterConfiguration(clusterNodes);
+        return new LettuceConnectionFactory(clusterConfiguration);
+    }
+
+    @Bean
+    public RedisCacheConfiguration redisCacheConfiguration(@Value("${cache.ttl}") Integer ttl) {
+        return RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofSeconds(ttl));
+    }
+
+    @Bean
+    @Profile("prod")
+    @Qualifier("clusterNodes")
+    public List<String> clusterNodes(
+            @Value("${" + REGION_PROPERTY_NAME + "}") String regionName,
+            @Value("${cache.cluster-id}") String cacheClusterId
+    ){
+        AmazonElastiCache client = AmazonElastiCacheClientBuilder.standard().withRegion(regionName).build();
+        DescribeCacheClustersRequest describeCacheClustersRequest = new DescribeCacheClustersRequest();
+        describeCacheClustersRequest.setShowCacheNodeInfo(true);
+        describeCacheClustersRequest.setCacheClusterId(cacheClusterId);
+        List<CacheCluster> cacheClusterList = client.describeCacheClusters(describeCacheClustersRequest).getCacheClusters();
+        if (cacheClusterList.isEmpty()) {
+            logger.error("Cache cluster with id " + cacheClusterId + " cannot be found!");
+        }
+        List<String> nodeList = new ArrayList<>();
+
+        for(CacheNode cacheNode : cacheClusterList.get(0).getCacheNodes()) {
+            String nodeAddr = cacheNode.getEndpoint().getAddress() + ":" +cacheNode.getEndpoint().getPort();
+            nodeList.add(nodeAddr);
+        }
+
+        return nodeList;
+    }
+
+
+    @Bean
+    @Profile("dev")
+    @Qualifier("clusterNodes")
+    public List<String> devClusterNodes(
+            @Value("${cache.host}") String host,
+            @Value("${cache.port}") String port
+    ){
+        return Collections.singletonList(host + ":" + port);
     }
 }
