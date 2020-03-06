@@ -156,16 +156,19 @@ public class MainConfiguration {
         AmazonElastiCache client = AmazonElastiCacheClientBuilder.standard().withRegion(regionName).build();
         DescribeCacheClustersRequest describeCacheClustersRequest = new DescribeCacheClustersRequest();
         describeCacheClustersRequest.setShowCacheNodeInfo(true);
-        describeCacheClustersRequest.setCacheClusterId(cacheClusterId);
         List<CacheCluster> cacheClusterList = client.describeCacheClusters(describeCacheClustersRequest).getCacheClusters();
         if (cacheClusterList.isEmpty()) {
             logger.error("Cache cluster with id " + cacheClusterId + " cannot be found!");
         }
         List<String> nodeList = new ArrayList<>();
 
-        for(CacheNode cacheNode : cacheClusterList.get(0).getCacheNodes()) {
-            String nodeAddr = cacheNode.getEndpoint().getAddress() + ":" +cacheNode.getEndpoint().getPort();
-            nodeList.add(nodeAddr);
+        for (CacheCluster cacheCluster : cacheClusterList) {
+            if (cacheCluster.getCacheClusterId().startsWith(cacheClusterId)) {
+                for (CacheNode cacheNode : cacheCluster.getCacheNodes()) {
+                    String nodeAddr = cacheNode.getEndpoint().getAddress() + ":" + cacheNode.getEndpoint().getPort();
+                    nodeList.add(nodeAddr);
+                }
+            }
         }
 
         return nodeList;
