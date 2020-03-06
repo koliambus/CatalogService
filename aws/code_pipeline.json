@@ -4,7 +4,7 @@
     "roleArn": "arn:aws:iam::433329183834:role/CodePipelineRole",
     "artifactStore": {
       "type": "S3",
-      "location": "com.packtpub.catalogservice.delivery.pipeline"
+      "location": "ua.koliambus.catalogservice.delivery.pipeline"
     },
     "stages": [
       {
@@ -20,7 +20,7 @@
               "version": "1"
             },
             "configuration": {
-              "S3Bucket": "com.packtpub.catalogservice.source",
+              "S3Bucket": "ua.koliambus.catalogservice.source",
               "S3ObjectKey": "CatalogService.zip",
               "PollForSourceChanges" : "true"
             },

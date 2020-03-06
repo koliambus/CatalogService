@@ -15,7 +15,7 @@
         "s3:PutObject"
       ],
       "Resource": [
-        "arn:aws:s3:::com.packtpub.catalogservice.delivery.pipeline*"
+        "arn:aws:s3:::ua.koliambus.catalogservice.delivery.pipeline*"
       ],
       "Effect": "Allow"
     },
